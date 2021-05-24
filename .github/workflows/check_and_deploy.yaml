@@ -26,17 +26,15 @@ jobs:
           script: ./gradlew connectedAndroidTest
 
   build:
-    needs: [ unit-tests, android_tests ]
+    needs: [ unit_tests, android_tests ]
     runs-on: ubuntu-latest
     steps:
       # 1 - Checks out the code
       - name: Checkout code
         uses: actions/checkout@v2
-
       # 2 - Generates a release APK using the assembleRelease Gradle task
       - name: Generate Release APK
         run: ./gradlew assembleRelease
-
       # 3 - Signs the APK using the r0adkll/sign-android-release action, which is a third party action available on the github marketplace.
       # This step uses the four secrets you added in github/project/settings/secrets. It also has an ID: sign_app.
       - name: Sign APK
@@ -49,15 +47,13 @@ jobs:
           alias: ${{ secrets.ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
-
-        # 4 - Uploads the signed APK as an artifact to Github. This step uses the ID from the previous step to access its output, named signedReleaseFile.
-        - uses: actions/upload-artifact@master
-          with:
-            name: release.apk
-            path: ${{ steps.sign_app.outputs.signedReleaseFile }}
-
-        # 5 - Uploads the mapping file as an artifact. We'll use this in later, when we upload to the Play Store.
-        - uses: actions/upload-artifact@master
-          with:
-            name: mapping.txt
-            path: app/build/outputs/mapping/release/mapping.txt
+      # 4 - Uploads the signed APK as an artifact to Github. This step uses the ID from the previous step to access its output, named signedReleaseFile.
+      - uses: actions/upload-artifact@master
+        with:
+          name: release.apk
+          path: ${{steps.sign_app.outputs.signedReleaseFile}}
+      # 5 - Uploads the mapping file as an artifact. We'll use this in later, when we upload to the Play Store.
+      - uses: actions/upload-artifact@master
+        with:
+          name: mapping.txt
+          path: app/build/outputs/mapping/release/mapping.txt
